@@ -72,7 +72,7 @@ async function addContact(name, email, phone) {
         contact.phone === phone
     );
     if (check) {
-      console.log("There is already exist the same contact");
+      console.log("There is already exist the contact with the same data");
       return console.table(allContacts);
     }
     const newContactsList = [
