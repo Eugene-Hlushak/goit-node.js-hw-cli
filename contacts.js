@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs/promises");
+const nanoid = import("nanoid");
 
 const base = path.basename("contacts.json");
 const dir = path.dirname("./db/contacts.json");
@@ -14,6 +15,8 @@ const getAllContacts = async () => {
   return JSON.parse(buffer);
 };
 
+const generateNewId = async () => (await nanoid).nanoid();
+
 const writeFile = async (path, file) => {
   await fs.writeFile(path, JSON.stringify(file));
   const newList = await getAllContacts();
@@ -26,6 +29,7 @@ const sorryLog = (contactId) =>
 async function listContacts() {
   try {
     const allContacts = await getAllContacts();
+
     console.table(allContacts);
   } catch (error) {
     console.log(error.message);
@@ -48,6 +52,8 @@ async function removeContact(contactId) {
     const allContacts = await getAllContacts();
     const deleted = allContacts.find((contact) => contact.id === contactId);
     if (!deleted) return sorryLog(contactId);
+
+    console.log("Operation succesfull!");
     const newContactsList = allContacts.filter(
       (contact) => contact.id !== contactId
     );
@@ -60,7 +66,10 @@ async function removeContact(contactId) {
 async function addContact(name, email, phone) {
   try {
     const allContacts = await getAllContacts();
-    const newContactsList = [...allContacts, { name, email, phone }];
+    const newContactsList = [
+      ...allContacts,
+      { id: await generateNewId(), name, email, phone },
+    ];
     await writeFile(contactsPath, newContactsList);
   } catch (error) {
     console.log(error.message);
