@@ -15,13 +15,13 @@ const getAllContacts = async () => {
   return JSON.parse(buffer);
 };
 
-const generateNewId = async () => (await nanoid).nanoid();
-
 const writeFile = async (path, file) => {
   await fs.writeFile(path, JSON.stringify(file));
   const newList = await getAllContacts();
   console.table(newList);
 };
+
+const generateNewId = async () => (await nanoid).nanoid();
 
 const sorryLog = (contactId) =>
   console.log(`Sorry, no contact found with this id '${contactId}'`);
@@ -29,7 +29,6 @@ const sorryLog = (contactId) =>
 async function listContacts() {
   try {
     const allContacts = await getAllContacts();
-
     console.table(allContacts);
   } catch (error) {
     console.log(error.message);
@@ -53,10 +52,10 @@ async function removeContact(contactId) {
     const deleted = allContacts.find((contact) => contact.id === contactId);
     if (!deleted) return sorryLog(contactId);
 
-    console.log("Operation succesfull!");
     const newContactsList = allContacts.filter(
       (contact) => contact.id !== contactId
     );
+    console.log(`Contact ${deleted.name} was succesfully deleted! `);
     await writeFile(contactsPath, newContactsList);
   } catch (error) {
     console.log(error.message);
@@ -66,10 +65,22 @@ async function removeContact(contactId) {
 async function addContact(name, email, phone) {
   try {
     const allContacts = await getAllContacts();
+    const check = allContacts.find(
+      (contact) =>
+        contact.name === name ||
+        contact.email === email ||
+        contact.phone === phone
+    );
+    if (check) {
+      console.log("There is already exist the same contact");
+      return console.table(allContacts);
+    }
     const newContactsList = [
       ...allContacts,
       { id: await generateNewId(), name, email, phone },
     ];
+
+    console.log(`Succsessfully added new contact ${name}`);
     await writeFile(contactsPath, newContactsList);
   } catch (error) {
     console.log(error.message);
